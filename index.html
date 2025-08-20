@@ -64,11 +64,12 @@
   </div>
 </div>
 
+<script defer>
+/* 你要顯示的實際檔名（和 repo 裡一模一樣） */
 const FILES = [
   "2017以前.jpg",
   "2017以前2.jpg",
   "2017以前3.jpg",
-  "2017以前.png",
   "2020.jpg",
   "2021.jpg",
   "2022.jpg",
@@ -77,28 +78,28 @@ const FILES = [
   "2025.jpg"
 ];
 
-
+/* ====== 依檔名自動分組與排序 ====== */
 const stripExt = f => f.replace(/\.[^/.]+$/,'');
-const isYear = s => /^\d{4}$/.test(s);
+const isYear   = s => /^\d{4}$/.test(s);
 const groupKey = base => isYear(base) ? base : base.replace(/[-_]?(\d+)$/,'');
-const orderValue = label => isYear(label) ? +label : (label.includes("以前") ? 0 : 999999);
+const orderVal = label => isYear(label) ? +label : (label.includes("以前") ? 0 : 999999);
 
 function buildGroups(files){
   const map = new Map();
   for(const f of files){
-    const base = stripExt(f);
-    const key = groupKey(base);
+    const key = groupKey(stripExt(f));
     if(!map.has(key)) map.set(key, []);
     map.get(key).push(f);
   }
   for(const [k,arr] of map) arr.sort((a,b)=>a.localeCompare(b,"zh-Hant"));
   const keys = [...map.keys()].sort((a,b)=>{
-    const oa = orderValue(a), ob = orderValue(b);
+    const oa = orderVal(a), ob = orderVal(b);
     return oa!==ob ? oa-ob : a.localeCompare(b,"zh-Hant");
   });
   return {map, keys};
 }
 
+/* ====== 繪製節點 ====== */
 const nodesEl = document.getElementById('nodes');
 const {map: groups, keys} = buildGroups(FILES);
 for (const key of keys){
@@ -110,6 +111,7 @@ for (const key of keys){
   nodesEl.appendChild(node);
 }
 
+/* ====== 浮層互動 ====== */
 const pop = document.getElementById('popover');
 const scrim = document.getElementById('scrim');
 const popImg = document.getElementById('popImg');
@@ -123,36 +125,78 @@ let currentGroup = null, currentIdx = 0;
 function openPopover(label, anchorEl){
   currentGroup = groups.get(label) || [];
   currentIdx = 0; updateImage();
+
   const r = anchorEl.getBoundingClientRect(), gap = 12;
   const preferredTop = Math.max(12, r.top - (pop.offsetHeight || 360) - gap);
-  let left = Math.min(innerWidth - 12 - pop.offsetWidth, Math.max(12, r.left + r.width/2 - (pop.offsetWidth||400)/2));
+  const left = Math.min(innerWidth - 12 - (pop.offsetWidth||420), Math.max(12, r.left + r.width/2 - (pop.offsetWidth||420)/2));
   pop.style.left = left + "px"; pop.style.top = preferredTop + "px";
+
   pop.style.display = 'block'; scrim.style.display = 'block';
 }
+
 function closePopover(){ pop.style.display='none'; scrim.style.display='none'; currentGroup=null; }
+
+/* ====== 核心：圖片載入失敗自動換副檔名（大小寫也處理） ====== */
+function setImageWithFallback(filename){
+  const base = stripExt(filename);
+  const origExt = filename.slice(filename.lastIndexOf('.')) || '';
+  const candidates = [];
+
+  // 原始 + 同副檔名大小寫變化
+  candidates.push(filename);
+  if (origExt){
+    const lower = base + origExt.toLowerCase();
+    const upper = base + origExt.toUpperCase();
+    if (!candidates.includes(lower)) candidates.push(lower);
+    if (!candidates.includes(upper)) candidates.push(upper);
+  }
+
+  // 常見替代副檔名
+  const altExts = ['.jpg','.jpeg','.png','.webp','.JPG','.JPEG','.PNG','.WEBP'];
+  for(const e of altExts){
+    const cand = base + e;
+    if (!candidates.includes(cand)) candidates.push(cand);
+  }
+
+  let i = 0;
+  popImg.onerror = () => {
+    i++;
+    if (i < candidates.length){
+      popImg.src = candidates[i];
+    }else{
+      popCap.textContent = `找不到圖片：${filename}`;
+    }
+  };
+  popImg.src = candidates[i];
+}
+
 function updateImage(){
   if(!currentGroup || !currentGroup.length) return;
   const src = currentGroup[currentIdx];
-  popImg.src = src; popImg.loading = "eager";
+  setImageWithFallback(src);
   popCap.textContent = `${src}  (${currentIdx+1}/${currentGroup.length})`;
-  const vis = currentGroup.length>1 ? 'visible':'hidden';
-  btnPrev.style.visibility = vis; btnNext.style.visibility = vis;
+  const v = currentGroup.length>1 ? 'visible' : 'hidden';
+  btnPrev.style.visibility = v; btnNext.style.visibility = v;
 }
 
+/* 事件 */
 nodesEl.addEventListener('mouseenter', e=>{
   const el = e.target.closest('.node'); if(!el) return;
   if (matchMedia('(hover:hover)').matches) openPopover(el.dataset.label, el);
 }, true);
 nodesEl.addEventListener('click', e=>{
-  const el = e.target.closest('.node'); if(!el) return; openPopover(el.dataset.label, el);
+  const el = e.target.closest('.node'); if(!el) return;
+  openPopover(el.dataset.label, el);
 });
-scrim.addEventListener('click', closePopover); btnClose.addEventListener('click', closePopover);
-btnPrev.addEventListener('click', e=>{ e.stopPropagation(); if(!currentGroup) return; currentIdx = (currentIdx-1+currentGroup.length)%currentGroup.length; updateImage(); });
-btnNext.addEventListener('click', e=>{ e.stopPropagation(); if(!currentGroup) return; currentIdx = (currentIdx+1)%currentGroup.length; updateImage(); });
-addEventListener('keydown', e=>{ if(pop.style.display!=='block') return;
+scrim.addEventListener('click', closePopover);
+btnClose.addEventListener('click', closePopover);
+btnPrev.addEventListener('click', e=>{ e.stopPropagation(); if(!currentGroup) return; currentIdx=(currentIdx-1+currentGroup.length)%currentGroup.length; updateImage(); });
+btnNext.addEventListener('click', e=>{ e.stopPropagation(); if(!currentGroup) return; currentIdx=(currentIdx+1)%currentGroup.length; updateImage(); });
+addEventListener('keydown', e=>{
+  if(pop.style.display!=='block') return;
   if(e.key==='Escape') closePopover();
-  if(e.key==='ArrowLeft'){ currentIdx = (currentIdx-1+currentGroup.length)%currentGroup.length; updateImage(); }
-  if(e.key==='ArrowRight'){ currentIdx = (currentIdx+1)%currentGroup.length; updateImage(); }
+  if(e.key==='ArrowLeft'){ currentIdx=(currentIdx-1+currentGroup.length)%currentGroup.length; updateImage(); }
+  if(e.key==='ArrowRight'){ currentIdx=(currentIdx+1)%currentGroup.length; updateImage(); }
 });
 </script>
 </body>
