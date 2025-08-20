@@ -6,108 +6,99 @@
 <title>塑塑寶貝Yui的臉部進化史</title>
 <style>
   :root{
-    --bg1:#211922; --bg2:#2a1f2b; --panel:#2f2533; --ink:#F6F0F4; --muted:#D9C9D4;
-    --accent:#E9A3B4; --accent2:#F4C2D3; --rail:#433949; --pill-bg:#3a2d3f;
-    --shadow:0 14px 34px rgba(0,0,0,.35);
-    --glow:0 0 0 6px rgba(233,163,180,.18),0 10px 26px rgba(233,163,180,.25);
+    --bg:#0b0c10; --bg2:#11131a; --panel:#171a22; --rail:#2a2f42;
+    --ink:#e8e8ee; --muted:#aeb2bb; --accent:#7aa2ff; --ring:#304ffe55;
+    --shadow:0 12px 28px rgba(0,0,0,.36);
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
-    margin:0;
-    background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 100%);
+    margin:0; background:linear-gradient(180deg,var(--bg) 0%, var(--bg2) 100%);
     color:var(--ink);
     font-family:ui-sans-serif,system-ui,"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial;
   }
-  header{
-    padding:20px 22px 10px; position:sticky; top:0; z-index:3;
-    background:linear-gradient(180deg,rgba(33,25,34,.92) 0%, rgba(33,25,34,.72) 100%);
-    backdrop-filter: blur(6px);
-    border-bottom:1px solid rgba(255,255,255,.06);
-  }
-  h1{margin:0; font-size:22px; letter-spacing:.6px}
-  .sub{color:var(--muted); font-size:13px; margin-top:6px}
-  .wrap{padding:18px 22px}
 
+  /* Header 置中 + 放大 */
+  header{
+    padding:24px 20px 16px; position:sticky; top:0; z-index:3;
+    background:linear-gradient(180deg,rgba(11,12,16,.92) 0%, rgba(11,12,16,.70) 100%);
+    backdrop-filter: blur(6px); border-bottom:1px solid #1f2230;
+    text-align:center;
+  }
+  h1{margin:0; font-size:28px; letter-spacing:.6px}
+  .sub{color:var(--muted); font-size:14px; margin-top:8px}
+  .wrap{padding:18px 20px}
+
+  /* Timeline：平均分布（等間距），只允許水平捲動 */
   .timeline{
-    background:var(--panel); border:1px solid rgba(255,255,255,.07); border-radius:16px;
+    background:var(--panel); border:1px solid #222636; border-radius:16px;
     padding:18px; box-shadow:var(--shadow);
   }
   .track{
-    position:relative; display:flex; align-items:center; gap:24px;
-    overflow-x:auto; overflow-y:hidden;              /* 垂直不捲動 */
-    padding:32px 8px 36px;                           /* 增加高度空間 */
+    position:relative; overflow-x:auto; overflow-y:hidden;   /* 高度固定不出直向捲軸 */
+    padding:26px 10px 32px;
     scrollbar-width:thin;
   }
   .track::-webkit-scrollbar{height:8px}
-  .track::-webkit-scrollbar-thumb{background:#3e3343;border-radius:8px}
-  .rail{position:absolute; left:12px; right:12px; top:64px; height:2px; background:var(--rail); border-radius:1px}
+  .track::-webkit-scrollbar-thumb{background:#2a2f42;border-radius:8px}
 
-  /* N2：膠囊節點 */
-  .nodes{display:flex; gap:18px; align-items:center; min-width:1100px}
-  .node{position:relative}
-  .pill{
-    display:inline-flex; align-items:center; justify-content:center;
-    padding:8px 16px; border-radius:999px;
-    background:linear-gradient(180deg,var(--pill-bg),#35293b);
-    color:var(--ink); font-size:13px; letter-spacing:.2px; white-space:nowrap;
-    border:1px solid rgba(255,255,255,.08);
-    box-shadow:var(--glow);
-    transition:transform .16s ease, box-shadow .2s ease, background .2s ease;
-    cursor:pointer;
+  .rail{
+    position:absolute; left:14px; right:14px; top:58px;
+    height:2px; background:var(--rail); border-radius:1px;
   }
-  .pill::before{
-    content:""; width:10px;height:10px;border-radius:50%; margin-right:8px;
-    background:radial-gradient(circle at 30% 30%, var(--accent2), var(--accent));
-    box-shadow:0 0 12px rgba(244,194,211,.55);
-  }
-  .node:hover .pill{ transform:scale(1.06); box-shadow:0 0 0 8px rgba(244,194,211,.16),0 16px 36px rgba(233,163,180,.28) }
 
-  /* C2：拍立得 */
+  /* 平均分布：Grid 橫向自動欄位 + 1fr */
+  .nodes{
+    display:grid; grid-auto-flow:column; grid-auto-columns:1fr;
+    align-items:center; gap:28px; min-width:100%;
+  }
+  .node{display:flex; flex-direction:column; align-items:center; gap:10px}
+  .dot{
+    width:14px; height:14px; border-radius:999px; background:var(--accent);
+    box-shadow:0 0 0 6px var(--ring), 0 6px 18px rgba(122,162,255,.35);
+    transition:transform .15s ease;
+  }
+  .node:hover .dot{ transform:scale(1.15) }
+  .label{font-size:13px; color:var(--ink); opacity:.95; white-space:nowrap}
+
+  /* Popover：簡單穩定版 */
   .popover{
     position:fixed; z-index:5; display:none;
-    width:min(92vw,640px); min-width:340px; padding:14px;
-    background:transparent; border:0; box-shadow:none;
+    background:#0f1118; border:1px solid #2a2f42; border-radius:14px;
+    box-shadow:var(--shadow);
+    width:min(92vw,620px); min-width:320px; padding:12px;
     animation:fadeIn .14s ease-out;
   }
-  @keyframes fadeIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-  .polaroid{
-    background:#fff; border-radius:12px; padding:12px 12px 22px;
-    box-shadow:0 18px 44px rgba(0,0,0,.45), 0 0 0 1px rgba(0,0,0,.06);
-    transform:rotate(-.4deg);
-  }
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
   .pop-img{
-    width:100%; max-height:70vh; display:block; object-fit:contain;
-    border-radius:8px; background:#000;
+    width:100%; max-height:70vh; display:block; object-fit:contain; border-radius:10px; background:#000;
   }
-  .pop-caption{
-    margin-top:10px; color:#373537; font-size:13px;
-    font-family:cursive, "Noto Sans TC","Microsoft JhengHei",sans-serif;
-    letter-spacing:.2px; white-space:pre-line;      /* 支援 \n 換行 */
-  }
+  .pop-caption{font-size:12px; color:var(--muted); margin-top:8px}
   .nav{position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between; pointer-events:none}
   .nav button{
-    pointer-events:auto; border:1px solid rgba(0,0,0,.12); background:rgba(255,255,255,.85);
-    width:34px;height:34px;border-radius:999px; display:grid; place-items:center; cursor:pointer;
+    pointer-events:auto; border:1px solid #3a3f55; background:#151826; color:var(--ink);
+    width:32px; height:32px; border-radius:999px; display:grid; place-items:center; cursor:pointer; opacity:.9;
   }
   .close-btn{
-    position:absolute; top:-6px; right:-6px;
-    width:30px; height:30px; border-radius:999px; border:1px solid rgba(0,0,0,.12);
-    background:rgba(255,255,255,.9); color:#333; display:grid; place-items:center; cursor:pointer;
+    position:absolute; top:8px; right:8px;
+    width:30px; height:30px; border-radius:999px; border:1px solid #3a3f55;
+    background:#151826; color:var(--ink); display:grid; place-items:center; cursor:pointer; opacity:.9;
   }
   .scrim{position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; z-index:4; backdrop-filter: blur(2px);}
 
+  /* 手機：垂直均分 */
   @media (max-width: 640px){
-    .nodes{min-width:unset; flex-wrap:wrap; gap:12px}
-    .track{overflow-x:visible; padding:24px 6px 24px}
     .rail{display:none}
+    .track{overflow-x:visible; padding:12px 6px 18px}
+    .nodes{grid-auto-flow:row; grid-template-columns:1fr 1fr; gap:16px 12px}
+    .node{align-items:flex-start}
   }
 </style>
 </head>
 <body>
   <header>
     <h1>塑塑寶貝Yui的臉部進化史</h1>
-    <div class="sub">電腦把游標輕點在年份上，就能翻開那一年的模樣；手機輕觸即可開啟相片，再輕觸空白處便合上回憶。</div>
+    <div class="sub">把游標輕落在年份上，回望那年的模樣；手機輕觸即可開啟相片，再點空白處便闔上回憶。</div>
   </header>
 
   <div class="wrap">
@@ -122,32 +113,22 @@
   <div id="scrim" class="scrim"></div>
   <div id="popover" class="popover" role="dialog" aria-modal="true">
     <button class="close-btn" title="關閉" aria-label="關閉" id="closeBtn">×</button>
-    <div class="polaroid">
-      <img id="popImg" class="pop-img" src="" alt="回憶照片" />
-      <div class="nav">
-        <button id="prevBtn" title="上一張" aria-label="上一張">‹</button>
-        <button id="nextBtn" title="下一張" aria-label="下一張">›</button>
-      </div>
-      <div id="popCaption" class="pop-caption"></div>
+    <img id="popImg" class="pop-img" src="" alt="回憶照片" />
+    <div class="nav">
+      <button id="prevBtn" title="上一張" aria-label="上一張">‹</button>
+      <button id="nextBtn" title="下一張" aria-label="下一張">›</button>
     </div>
+    <div id="popCaption" class="pop-caption"></div>
   </div>
 
 <script defer>
-/* 你的檔名（與 repo 完全一致） */
+/* 實際檔名（與 repo 完全一致） */
 const FILES = [
   "2017以前.jpg","2017以前2.jpg","2017以前3.jpg","2017以前.PNG",
   "2020.jpg","2021.jpg","2022.jpg","2023.jpg","2024.jpg","2025.jpg"
 ];
 
-/* 可選：針對單張相片或整個群組的「拍立得文字」 */
-const CAPTIONS = {
-  // "2021.jpg": "2021 夏天\n一杯粉紅拿鐵 ☕️",
-};
-const GROUP_CAPTIONS = {
-  // "2017以前": "國中～高中\n萌系起點 ✨",
-};
-
-/* —— 分組排序 —— */
+/* —— 依檔名分組排序（穩定版） —— */
 const stripExt = f => f.replace(/\.[^/.]+$/,'');
 const isYear   = s => /^\d{4}$/.test(s);
 const groupKey = base => isYear(base) ? base : base.replace(/[-_]?(\d+)$/,'');
@@ -167,17 +148,17 @@ function buildGroups(files){
   return {map, keys};
 }
 
-/* —— 畫出膠囊節點 —— */
+/* —— 繪製節點（平均分布由 CSS Grid 負責） —— */
 const nodesEl = document.getElementById('nodes');
 const {map: groups, keys} = buildGroups(FILES);
 for (const key of keys){
   const node = document.createElement('div');
   node.className = 'node'; node.dataset.label = key; node.tabIndex = 0;
-  node.innerHTML = `<div class="pill">${key}</div>`;
+  node.innerHTML = `<div class="dot" aria-hidden="true"></div><div class="label">${key}</div>`;
   nodesEl.appendChild(node);
 }
 
-/* —— 拍立得浮層 & 載入補救 —— */
+/* —— 簡潔浮層，保留副檔名大小寫自動補救 —— */
 const pop = document.getElementById('popover');
 const scrim = document.getElementById('scrim');
 const popImg = document.getElementById('popImg');
@@ -186,14 +167,13 @@ const btnPrev = document.getElementById('prevBtn');
 const btnNext = document.getElementById('nextBtn');
 const btnClose = document.getElementById('closeBtn');
 
-let currentGroup = null, currentIdx = 0, currentLabel = "";
+let currentGroup = null, currentIdx = 0;
 
 function openPopover(label, anchorEl){
   currentGroup = groups.get(label) || [];
-  currentLabel = label;
   currentIdx = 0; updateImage();
 
-  const r = anchorEl.getBoundingClientRect(), gap = 14;
+  const r = anchorEl.getBoundingClientRect(), gap = 12;
   const w = pop.offsetWidth || 520, h = pop.offsetHeight || 420;
   const top = Math.max(12, r.top - h - gap);
   const left = Math.min(innerWidth - 12 - w, Math.max(12, r.left + r.width/2 - w/2));
@@ -210,29 +190,24 @@ function makeCandidates(filename){
   if (orig) { push(base+orig); push(base+orig.toLowerCase()); push(base+orig.toUpperCase()); }
   push(filename);
   ['.jpg','.jpeg','.png','.webp','.JPG','.JPEG','.PNG','.WEBP'].forEach(e => push(base+e));
-  return cand.map(u => encodeURI(u));
+  return cand.map(u => encodeURI(u));  // 處理中文/空白
 }
 function setImageWithFallback(filename){
   const candidates = makeCandidates(filename);
   let i = 0;
   popImg.onerror = () => { i++; if (i < candidates.length) popImg.src = candidates[i]; else popCap.textContent = `找不到圖片：${filename}`; };
-  popImg.src = candidates[i];
-}
-function currentCaption(name, label){
-  return CAPTIONS[name] ?? GROUP_CAPTIONS[label] ?? "";  // 沒填則回空字串
+  popImg.src = candidates[0];
 }
 function updateImage(){
   if(!currentGroup || !currentGroup.length) return;
   const name = currentGroup[currentIdx];
   setImageWithFallback(name);
-  const cap = currentCaption(name, currentLabel);
-  const counter = ` (${currentIdx+1}/${currentGroup.length})`;
-  popCap.textContent = (cap ? cap : name) + counter;
+  popCap.textContent = `${name}  (${currentIdx+1}/${currentGroup.length})`;
   const v = currentGroup.length>1 ? 'visible' : 'hidden';
   btnPrev.style.visibility = v; btnNext.style.visibility = v;
 }
 
-/* —— 事件（修正：正確傳入 label 字串） —— */
+/* 事件（正確傳入 label 字串） */
 nodesEl.addEventListener('mouseenter', e=>{
   const el = e.target.closest('.node'); if(!el) return;
   if (matchMedia('(hover:hover)').matches) openPopover(el.dataset.label, el);
