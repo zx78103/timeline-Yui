@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>回憶時間軸</title>
+<style>
+  :root{--bg:#0b0c10;--panel:#15171e;--ink:#e8e8ee;--muted:#9aa0a6;--accent:#7aa2ff;--ring:#304ffe55;--shadow:0 10px 30px rgba(0,0,0,.35)}
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;background:linear-gradient(180deg,#0b0c10 0%, #11131a 100%);color:var(--ink);font-family:ui-sans-serif,system-ui,"Noto Sans TC","PingFang TC",Segoe UI,Roboto,Helvetica,Arial}
+  header{padding:18px 20px 6px;position:sticky;top:0;z-index:3;background:linear-gradient(180deg,rgba(11,12,16,.95) 0%,rgba(11,12,16,.7) 100%);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-bottom:1px solid #1f2230}
+  h1{margin:0;font-size:20px;letter-spacing:.5px} .sub{color:var(--muted);font-size:12px;margin-top:6px}
+  .wrap{padding:18px 20px}
+  .timeline{background:var(--panel);border:1px solid #222636;border-radius:16px;padding:18px;box-shadow:var(--shadow)}
+  .track{display:flex;gap:36px;align-items:center;overflow-x:auto;scrollbar-width:thin;padding:14px 6px}
+  .track::-webkit-scrollbar{height:8px}.track::-webkit-scrollbar-thumb{background:#2a2f42;border-radius:8px}
+  .rail{height:2px;background:#2a2f42;position:relative;flex:1;min-width:1200px}
+  .nodes{position:absolute;inset:-14px 0 -14px 0;display:flex;gap:36px;align-items:center}
+  .node{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;min-width:86px}
+  .dot{width:14px;height:14px;border-radius:999px;background:var(--accent);box-shadow:0 0 0 6px var(--ring),0 4px 16px rgba(122,162,255,.35);transition:transform .15s ease}
+  .node:hover .dot{transform:scale(1.15)}
+  .label{font-size:13px;color:var(--ink);opacity:.95;text-align:center;white-space:nowrap}
+  .popover{position:fixed;z-index:5;display:none;background:#0f1118;border:1px solid #2a2f42;border-radius:14px;box-shadow:var(--shadow);max-width:min(92vw,580px);padding:12px;animation:fadeIn .14s ease-out}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+  .pop-inner{position:relative}.pop-img{width:100%;height:auto;display:block;border-radius:10px;object-fit:cover;max-height:70vh}
+  .pop-caption{font-size:12px;color:var(--muted);margin-top:8px}
+  .nav{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+  .nav button{pointer-events:auto;border:1px solid #3a3f55;background:#151826;color:var(--ink);width:32px;height:32px;border-radius:999px;display:grid;place-items:center;cursor:pointer;opacity:.9}
+  .nav button:hover{opacity:1}
+  .close-btn{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:999px;border:1px solid #3a3f55;background:#151826;color:var(--ink);display:grid;place-items:center;cursor:pointer;opacity:.85}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:4;backdrop-filter:blur(2px)}
+  .hint{margin-top:12px;font-size:12px;color:var(--muted)}
+  .kbd{padding:.5px 6px;border:1px solid #2c3146;border-bottom-width:2px;border-radius:6px;background:#0f1220;color:#b8c1ff}
+  @media (max-width:640px){.rail{min-width:auto;height:auto}.nodes{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.track{overflow-x:visible}.node{min-width:auto;align-items:flex-start}.dot{width:10px;height:10px}.label{font-size:14px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>回憶時間軸</h1>
+  <div class="sub">滑鼠移到節點會顯示照片；手機請輕點節點開啟，再點空白處關閉。</div>
+</header>
+
+<div class="wrap">
+  <div class="timeline">
+    <div class="track">
+      <div class="rail">
+        <div id="nodes" class="nodes"></div>
+      </div>
+    </div>
+    <div class="hint">提示：新增照片只要把檔名放進 <span class="kbd">FILES</span> 陣列即可（同名前綴會自動分在同一組，如 <span class="kbd">2017以前.jpg</span>、<span class="kbd">2017以前2.jpg</span>）。</div>
+  </div>
+</div>
+
+<div id="scrim" class="scrim"></div>
+<div id="popover" class="popover" role="dialog" aria-modal="true">
+  <button class="close-btn" title="關閉" aria-label="關閉" id="closeBtn">×</button>
+  <div class="pop-inner">
+    <img id="popImg" class="pop-img" src="" alt="回憶照片" loading="eager" />
+    <div class="nav">
+      <button id="prevBtn" title="上一張" aria-label="上一張">‹</button>
+      <button id="nextBtn" title="下一張" aria-label="下一張">›</button>
+    </div>
+    <div id="popCaption" class="pop-caption"></div>
+  </div>
+</div>
+
+<script>
+const FILES = [
+  "2017以前.PNG","2017以前2.jpg","2017以前3.jpg",
+  "2020.jpg","2021.jpg","2022.jpg","2023.jpg","2024.jpg","2025.jpg"
+];
+
+const stripExt = f => f.replace(/\.[^/.]+$/,'');
+const isYear = s => /^\d{4}$/.test(s);
+const groupKey = base => isYear(base) ? base : base.replace(/[-_]?(\d+)$/,'');
+const orderValue = label => isYear(label) ? +label : (label.includes("以前") ? 0 : 999999);
+
+function buildGroups(files){
+  const map = new Map();
+  for(const f of files){
+    const base = stripExt(f);
+    const key = groupKey(base);
+    if(!map.has(key)) map.set(key, []);
+    map.get(key).push(f);
+  }
+  for(const [k,arr] of map) arr.sort((a,b)=>a.localeCompare(b,"zh-Hant"));
+  const keys = [...map.keys()].sort((a,b)=>{
+    const oa = orderValue(a), ob = orderValue(b);
+    return oa!==ob ? oa-ob : a.localeCompare(b,"zh-Hant");
+  });
+  return {map, keys};
+}
+
+const nodesEl = document.getElementById('nodes');
+const {map: groups, keys} = buildGroups(FILES);
+for (const key of keys){
+  const node = document.createElement('div');
+  node.className = 'node';
+  node.tabIndex = 0;
+  node.dataset.label = key;
+  node.innerHTML = `<div class="dot" aria-hidden="true"></div><div class="label">${key}</div>`;
+  nodesEl.appendChild(node);
+}
+
+const pop = document.getElementById('popover');
+const scrim = document.getElementById('scrim');
+const popImg = document.getElementById('popImg');
+const popCap = document.getElementById('popCaption');
+const btnPrev = document.getElementById('prevBtn');
+const btnNext = document.getElementById('nextBtn');
+const btnClose = document.getElementById('closeBtn');
+
+let currentGroup = null, currentIdx = 0;
+
+function openPopover(label, anchorEl){
+  currentGroup = groups.get(label) || [];
+  currentIdx = 0; updateImage();
+  const r = anchorEl.getBoundingClientRect(), gap = 12;
+  const preferredTop = Math.max(12, r.top - (pop.offsetHeight || 360) - gap);
+  let left = Math.min(innerWidth - 12 - pop.offsetWidth, Math.max(12, r.left + r.width/2 - (pop.offsetWidth||400)/2));
+  pop.style.left = left + "px"; pop.style.top = preferredTop + "px";
+  pop.style.display = 'block'; scrim.style.display = 'block';
+}
+function closePopover(){ pop.style.display='none'; scrim.style.display='none'; currentGroup=null; }
+function updateImage(){
+  if(!currentGroup || !currentGroup.length) return;
+  const src = currentGroup[currentIdx];
+  popImg.src = src; popImg.loading = "eager";
+  popCap.textContent = `${src}  (${currentIdx+1}/${currentGroup.length})`;
+  const vis = currentGroup.length>1 ? 'visible':'hidden';
+  btnPrev.style.visibility = vis; btnNext.style.visibility = vis;
+}
+
+nodesEl.addEventListener('mouseenter', e=>{
+  const el = e.target.closest('.node'); if(!el) return;
+  if (matchMedia('(hover:hover)').matches) openPopover(el.dataset.label, el);
+}, true);
+nodesEl.addEventListener('click', e=>{
+  const el = e.target.closest('.node'); if(!el) return; openPopover(el.dataset.label, el);
+});
+scrim.addEventListener('click', closePopover); btnClose.addEventListener('click', closePopover);
+btnPrev.addEventListener('click', e=>{ e.stopPropagation(); if(!currentGroup) return; currentIdx = (currentIdx-1+currentGroup.length)%currentGroup.length; updateImage(); });
+btnNext.addEventListener('click', e=>{ e.stopPropagation(); if(!currentGroup) return; currentIdx = (currentIdx+1)%currentGroup.length; updateImage(); });
+addEventListener('keydown', e=>{ if(pop.style.display!=='block') return;
+  if(e.key==='Escape') closePopover();
+  if(e.key==='ArrowLeft'){ currentIdx = (currentIdx-1+currentGroup.length)%currentGroup.length; updateImage(); }
+  if(e.key==='ArrowRight'){ currentIdx = (currentIdx+1)%currentGroup.length; updateImage(); }
+});
+</script>
+</body>
+</html>
