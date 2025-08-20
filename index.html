@@ -6,48 +6,53 @@
 <title>塑塑寶貝Yui的臉部進化史</title>
 <style>
   :root{
-    --bg:#0b0c10; --bg2:#11131a; --panel:#171a22; --rail:#2a2f42;
-    --ink:#e8e8ee; --muted:#aeb2bb; --accent:#7aa2ff; --ring:#304ffe55;
-    --shadow:0 12px 28px rgba(0,0,0,.36);
+    /* —— 白底桃粉主題 —— */
+    --bg:#ffffff;
+    --ink:#1f2230;
+    --muted:#6b7280;
+    --panel:#ffffff;
+    --rail:#ffd6e7;               /* 時間軌：淡粉 */
+    --accent:#ff5fa2;             /* 點/字重點：桃粉 */
+    --accent-2:#ffc7de;           /* 光暈：更淡的粉 */
+    --border:#f1e0ea;             /* 卡片邊框 */
+    --shadow:0 10px 26px rgba(0,0,0,.08);
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
-    margin:0; background:linear-gradient(180deg,var(--bg) 0%, var(--bg2) 100%);
-    color:var(--ink);
+    margin:0; background:var(--bg); color:var(--ink);
     font-family:ui-sans-serif,system-ui,"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial;
   }
 
-  /* Header 置中 + 放大 */
+  /* Header：置中＋放大 */
   header{
-    padding:24px 20px 16px; position:sticky; top:0; z-index:3;
-    background:linear-gradient(180deg,rgba(11,12,16,.92) 0%, rgba(11,12,16,.70) 100%);
-    backdrop-filter: blur(6px); border-bottom:1px solid #1f2230;
-    text-align:center;
+    text-align:center; padding:28px 20px 18px; position:sticky; top:0; z-index:3;
+    background:linear-gradient(180deg,rgba(255,255,255,.95) 0%, rgba(255,255,255,.85) 100%);
+    border-bottom:1px solid var(--border); backdrop-filter: blur(6px);
   }
-  h1{margin:0; font-size:28px; letter-spacing:.6px}
+  h1{margin:0; font-size:34px; letter-spacing:.6px}
   .sub{color:var(--muted); font-size:14px; margin-top:8px}
+
   .wrap{padding:18px 20px}
 
-  /* Timeline：平均分布（等間距），只允許水平捲動 */
+  /* Timeline（白底卡片、等間距） */
   .timeline{
-    background:var(--panel); border:1px solid #222636; border-radius:16px;
+    background:var(--panel); border:1px solid var(--border); border-radius:16px;
     padding:18px; box-shadow:var(--shadow);
   }
   .track{
-    position:relative; overflow-x:auto; overflow-y:hidden;   /* 高度固定不出直向捲軸 */
-    padding:26px 10px 32px;
-    scrollbar-width:thin;
+    position:relative; overflow-x:auto; overflow-y:hidden;
+    padding:28px 10px 34px; scrollbar-width:thin;
   }
   .track::-webkit-scrollbar{height:8px}
-  .track::-webkit-scrollbar-thumb{background:#2a2f42;border-radius:8px}
+  .track::-webkit-scrollbar-thumb{background:#e9e9ef;border-radius:8px}
 
   .rail{
-    position:absolute; left:14px; right:14px; top:58px;
+    position:absolute; left:14px; right:14px; top:60px;
     height:2px; background:var(--rail); border-radius:1px;
   }
 
-  /* 平均分布：Grid 橫向自動欄位 + 1fr */
+  /* 等間距：每個節點占 1fr 欄位 */
   .nodes{
     display:grid; grid-auto-flow:column; grid-auto-columns:1fr;
     align-items:center; gap:28px; min-width:100%;
@@ -55,16 +60,16 @@
   .node{display:flex; flex-direction:column; align-items:center; gap:10px}
   .dot{
     width:14px; height:14px; border-radius:999px; background:var(--accent);
-    box-shadow:0 0 0 6px var(--ring), 0 6px 18px rgba(122,162,255,.35);
+    box-shadow:0 0 0 6px rgba(255,95,162,.18), 0 6px 18px rgba(255,95,162,.35);
     transition:transform .15s ease;
   }
   .node:hover .dot{ transform:scale(1.15) }
   .label{font-size:13px; color:var(--ink); opacity:.95; white-space:nowrap}
 
-  /* Popover：簡單穩定版 */
+  /* Popover（白底） */
   .popover{
     position:fixed; z-index:5; display:none;
-    background:#0f1118; border:1px solid #2a2f42; border-radius:14px;
+    background:#fff; border:1px solid var(--border); border-radius:14px;
     box-shadow:var(--shadow);
     width:min(92vw,620px); min-width:320px; padding:12px;
     animation:fadeIn .14s ease-out;
@@ -76,22 +81,33 @@
   .pop-caption{font-size:12px; color:var(--muted); margin-top:8px}
   .nav{position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between; pointer-events:none}
   .nav button{
-    pointer-events:auto; border:1px solid #3a3f55; background:#151826; color:var(--ink);
-    width:32px; height:32px; border-radius:999px; display:grid; place-items:center; cursor:pointer; opacity:.9;
+    pointer-events:auto; border:1px solid var(--border); background:#fff; color:var(--ink);
+    width:32px; height:32px; border-radius:999px; display:grid; place-items:center; cursor:pointer;
   }
   .close-btn{
     position:absolute; top:8px; right:8px;
-    width:30px; height:30px; border-radius:999px; border:1px solid #3a3f55;
-    background:#151826; color:var(--ink); display:grid; place-items:center; cursor:pointer; opacity:.9;
+    width:30px; height:30px; border-radius:999px; border:1px solid var(--border);
+    background:#fff; color:var(--ink); display:grid; place-items:center; cursor:pointer;
   }
-  .scrim{position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; z-index:4; backdrop-filter: blur(2px);}
+  .scrim{position:fixed; inset:0; background:rgba(0,0,0,.38); display:none; z-index:4; backdrop-filter: blur(2px);}
 
-  /* 手機：垂直均分 */
+  /* Quotes 區塊 */
+  .quotes{max-width:980px; margin:24px auto 80px; padding:0 12px; display:grid; gap:14px}
+  .quote{
+    background:#fff; border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow);
+    padding:14px 16px; text-align:center;
+  }
+  .quote .en{font-size:16px; color:var(--ink)}
+  .quote .from{margin-top:6px; font-size:13px; color:var(--muted)}
+  .quote .from b{color:var(--accent)}
+
+  /* 手機 */
   @media (max-width: 640px){
     .rail{display:none}
-    .track{overflow-x:visible; padding:12px 6px 18px}
+    .track{overflow-x:visible; padding:16px 6px 20px}
     .nodes{grid-auto-flow:row; grid-template-columns:1fr 1fr; gap:16px 12px}
     .node{align-items:flex-start}
+    h1{font-size:28px}
   }
 </style>
 </head>
@@ -110,6 +126,18 @@
     </div>
   </div>
 
+  <!-- 你的兩段話 -->
+  <section class="quotes">
+    <div class="quote">
+      <div class="en">“Love looks not with the eyes, but with the mind; and therefore is winged Cupid painted blind.”</div>
+      <div class="from">— <b>William Shakespeare</b></div>
+    </div>
+    <div class="quote">
+      <div class="en">外貌會隨著時間改變，但妳的善良與真誠，卻是我永遠看不膩的風景。</div>
+      <div class="from">— <b>lhy</b></div>
+    </div>
+  </section>
+
   <div id="scrim" class="scrim"></div>
   <div id="popover" class="popover" role="dialog" aria-modal="true">
     <button class="close-btn" title="關閉" aria-label="關閉" id="closeBtn">×</button>
@@ -122,13 +150,13 @@
   </div>
 
 <script defer>
-/* 實際檔名（與 repo 完全一致） */
+/* 你的檔名（與 repo 完全一致） */
 const FILES = [
   "2017以前.jpg","2017以前2.jpg","2017以前3.jpg","2017以前.PNG",
   "2020.jpg","2021.jpg","2022.jpg","2023.jpg","2024.jpg","2025.jpg"
 ];
 
-/* —— 依檔名分組排序（穩定版） —— */
+/* —— 分組排序（穩定版） —— */
 const stripExt = f => f.replace(/\.[^/.]+$/,'');
 const isYear   = s => /^\d{4}$/.test(s);
 const groupKey = base => isYear(base) ? base : base.replace(/[-_]?(\d+)$/,'');
@@ -148,7 +176,7 @@ function buildGroups(files){
   return {map, keys};
 }
 
-/* —— 繪製節點（平均分布由 CSS Grid 負責） —— */
+/* —— 節點（平均分布由 CSS 控制） —— */
 const nodesEl = document.getElementById('nodes');
 const {map: groups, keys} = buildGroups(FILES);
 for (const key of keys){
@@ -158,7 +186,7 @@ for (const key of keys){
   nodesEl.appendChild(node);
 }
 
-/* —— 簡潔浮層，保留副檔名大小寫自動補救 —— */
+/* —— 浮層，含副檔名大小寫自動補救 —— */
 const pop = document.getElementById('popover');
 const scrim = document.getElementById('scrim');
 const popImg = document.getElementById('popImg');
@@ -190,7 +218,7 @@ function makeCandidates(filename){
   if (orig) { push(base+orig); push(base+orig.toLowerCase()); push(base+orig.toUpperCase()); }
   push(filename);
   ['.jpg','.jpeg','.png','.webp','.JPG','.JPEG','.PNG','.WEBP'].forEach(e => push(base+e));
-  return cand.map(u => encodeURI(u));  // 處理中文/空白
+  return cand.map(u => encodeURI(u));
 }
 function setImageWithFallback(filename){
   const candidates = makeCandidates(filename);
