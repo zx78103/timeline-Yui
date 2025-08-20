@@ -20,18 +20,46 @@
   .dot{width:14px;height:14px;border-radius:999px;background:var(--accent);box-shadow:0 0 0 6px var(--ring),0 4px 16px rgba(122,162,255,.35);transition:transform .15s ease}
   .node:hover .dot{transform:scale(1.15)}
   .label{font-size:13px;color:var(--ink);opacity:.95;text-align:center;white-space:nowrap}
-  .popover{position:fixed;z-index:5;display:none;background:#0f1118;border:1px solid #2a2f42;border-radius:14px;box-shadow:var(--shadow);max-width:min(92vw,580px);padding:12px;animation:fadeIn .14s ease-out}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-  .pop-inner{position:relative}.pop-img{width:100%;height:auto;display:block;border-radius:10px;object-fit:cover;max-height:70vh}
-  .pop-caption{font-size:12px;color:var(--muted);margin-top:8px}
-  .nav{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
-  .nav button{pointer-events:auto;border:1px solid #3a3f55;background:#151826;color:var(--ink);width:32px;height:32px;border-radius:999px;display:grid;place-items:center;cursor:pointer;opacity:.9}
+
+  /* popover */
+  .popover{
+    position:fixed; z-index:5; display:none;
+    background:#0f1118; border:1px solid #2a2f42; border-radius:14px;
+    box-shadow: var(--shadow);
+    width:min(92vw,640px); min-width:320px; padding:12px;  /* 固定寬避免縮成小塊 */
+    animation:fadeIn .14s ease-out;
+  }
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
+  .pop-inner{position:relative}
+  .pop-img{
+    width:100%; max-height:70vh; display:block; border-radius:10px;
+    object-fit:contain; background:#0b0c10;  /* 載不到也不會亂版 */
+  }
+  .pop-caption{font-size:12px;color:var(--muted); margin-top:8px}
+  .nav{position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between; pointer-events:none}
+  .nav button{
+    pointer-events:auto; border:1px solid #3a3f55; background:#151826; color:var(--ink);
+    width:32px;height:32px;border-radius:999px; display:grid; place-items:center; cursor:pointer; opacity:.9;
+  }
   .nav button:hover{opacity:1}
-  .close-btn{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:999px;border:1px solid #3a3f55;background:#151826;color:var(--ink);display:grid;place-items:center;cursor:pointer;opacity:.85}
-  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:4;backdrop-filter:blur(2px)}
-  .hint{margin-top:12px;font-size:12px;color:var(--muted)}
+  .close-btn{
+    position:absolute; top:8px; right:8px;
+    width:30px; height:30px; border-radius:999px; border:1px solid #3a3f55;
+    background:#151826; color:var(--ink); display:grid; place-items:center; cursor:pointer; opacity:.85;
+  }
+  .scrim{position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; z-index:4; backdrop-filter: blur(2px);}
+
+  .hint{margin-top:12px; font-size:12px; color:var(--muted)}
   .kbd{padding:.5px 6px;border:1px solid #2c3146;border-bottom-width:2px;border-radius:6px;background:#0f1220;color:#b8c1ff}
-  @media (max-width:640px){.rail{min-width:auto;height:auto}.nodes{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.track{overflow-x:visible}.node{min-width:auto;align-items:flex-start}.dot{width:10px;height:10px}.label{font-size:14px}}
+
+  @media (max-width:640px){
+    .rail{min-width:auto;height:auto}
+    .nodes{position:static; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px}
+    .track{overflow-x:visible}
+    .node{min-width:auto; align-items:flex-start}
+    .dot{width:10px;height:10px}
+    .label{font-size:14px}
+  }
 </style>
 </head>
 <body>
@@ -43,11 +71,9 @@
 <div class="wrap">
   <div class="timeline">
     <div class="track">
-      <div class="rail">
-        <div id="nodes" class="nodes"></div>
-      </div>
+      <div class="rail"><div id="nodes" class="nodes"></div></div>
     </div>
-    <div class="hint">提示：新增照片只要把檔名放進 <span class="kbd">FILES</span> 陣列即可（同名前綴會自動分在同一組，如 <span class="kbd">2017以前.jpg</span>、<span class="kbd">2017以前2.jpg</span>）。</div>
+    <div class="hint">新增照片只要把檔名放進 <span class="kbd">FILES</span> 陣列；同前綴＋數字會自動成一組（如 <span class="kbd">2017以前.jpg</span>、<span class="kbd">2017以前2.jpg</span>）。</div>
   </div>
 </div>
 
@@ -55,7 +81,7 @@
 <div id="popover" class="popover" role="dialog" aria-modal="true">
   <button class="close-btn" title="關閉" aria-label="關閉" id="closeBtn">×</button>
   <div class="pop-inner">
-    <img id="popImg" class="pop-img" src="" alt="回憶照片" loading="eager" />
+    <img id="popImg" class="pop-img" src="" alt="回憶照片" />
     <div class="nav">
       <button id="prevBtn" title="上一張" aria-label="上一張">‹</button>
       <button id="nextBtn" title="下一張" aria-label="下一張">›</button>
@@ -65,20 +91,16 @@
 </div>
 
 <script defer>
-/* 你要顯示的實際檔名（和 repo 裡一模一樣） */
+/* ===== 這裡列你的檔名（跟 repo 裡完全一樣） ===== */
 const FILES = [
-  "2017以前.jpg",
+  "2017以前.jpg",   // 你說這張要顯示——已加入
   "2017以前2.jpg",
   "2017以前3.jpg",
-  "2020.jpg",
-  "2021.jpg",
-  "2022.jpg",
-  "2023.jpg",
-  "2024.jpg",
-  "2025.jpg"
+  "2017以前.PNG",   // 要的話保留；不想重複可刪
+  "2020.jpg","2021.jpg","2022.jpg","2023.jpg","2024.jpg","2025.jpg"
 ];
 
-/* ====== 依檔名自動分組與排序 ====== */
+/* ===== 規則：依檔名自動分組與排序 ===== */
 const stripExt = f => f.replace(/\.[^/.]+$/,'');
 const isYear   = s => /^\d{4}$/.test(s);
 const groupKey = base => isYear(base) ? base : base.replace(/[-_]?(\d+)$/,'');
@@ -99,19 +121,17 @@ function buildGroups(files){
   return {map, keys};
 }
 
-/* ====== 繪製節點 ====== */
+/* ===== 繪節點 ===== */
 const nodesEl = document.getElementById('nodes');
 const {map: groups, keys} = buildGroups(FILES);
 for (const key of keys){
   const node = document.createElement('div');
-  node.className = 'node';
-  node.tabIndex = 0;
-  node.dataset.label = key;
+  node.className = 'node'; node.tabIndex = 0; node.dataset.label = key;
   node.innerHTML = `<div class="dot" aria-hidden="true"></div><div class="label">${key}</div>`;
   nodesEl.appendChild(node);
 }
 
-/* ====== 浮層互動 ====== */
+/* ===== 浮層行為 ===== */
 const pop = document.getElementById('popover');
 const scrim = document.getElementById('scrim');
 const popImg = document.getElementById('popImg');
@@ -127,54 +147,44 @@ function openPopover(label, anchorEl){
   currentIdx = 0; updateImage();
 
   const r = anchorEl.getBoundingClientRect(), gap = 12;
-  const preferredTop = Math.max(12, r.top - (pop.offsetHeight || 360) - gap);
-  const left = Math.min(innerWidth - 12 - (pop.offsetWidth||420), Math.max(12, r.left + r.width/2 - (pop.offsetWidth||420)/2));
+  const preferredTop = Math.max(12, r.top - (pop.offsetHeight || 380) - gap);
+  const w = pop.offsetWidth || 480;
+  const left = Math.min(innerWidth - 12 - w, Math.max(12, r.left + r.width/2 - w/2));
   pop.style.left = left + "px"; pop.style.top = preferredTop + "px";
 
   pop.style.display = 'block'; scrim.style.display = 'block';
 }
-
 function closePopover(){ pop.style.display='none'; scrim.style.display='none'; currentGroup=null; }
 
-/* ====== 核心：圖片載入失敗自動換副檔名（大小寫也處理） ====== */
-function setImageWithFallback(filename){
+/* ===== 重要：載入失敗時自動嘗試各種副檔名與大小寫，並用 encodeURI 處理中文檔名 ===== */
+function makeCandidates(filename){
   const base = stripExt(filename);
-  const origExt = filename.slice(filename.lastIndexOf('.')) || '';
-  const candidates = [];
+  const orig = filename.slice(filename.lastIndexOf('.')) || '';
+  const cand = [];
+  const push = u => { if(!cand.includes(u)) cand.push(u); };
 
-  // 原始 + 同副檔名大小寫變化
-  candidates.push(filename);
-  if (origExt){
-    const lower = base + origExt.toLowerCase();
-    const upper = base + origExt.toUpperCase();
-    if (!candidates.includes(lower)) candidates.push(lower);
-    if (!candidates.includes(upper)) candidates.push(upper);
-  }
+  if (orig) { push(base+orig); push(base+orig.toLowerCase()); push(base+orig.toUpperCase()); }
+  push(filename);
+  ['.jpg','.jpeg','.png','.webp','.JPG','.JPEG','.PNG','.WEBP'].forEach(e => push(base+e));
+  return cand.map(u => encodeURI(u));  // 關鍵：中文與空白編碼
+}
 
-  // 常見替代副檔名
-  const altExts = ['.jpg','.jpeg','.png','.webp','.JPG','.JPEG','.PNG','.WEBP'];
-  for(const e of altExts){
-    const cand = base + e;
-    if (!candidates.includes(cand)) candidates.push(cand);
-  }
-
+function setImageWithFallback(filename){
+  const candidates = makeCandidates(filename);
   let i = 0;
   popImg.onerror = () => {
     i++;
-    if (i < candidates.length){
-      popImg.src = candidates[i];
-    }else{
-      popCap.textContent = `找不到圖片：${filename}`;
-    }
+    if (i < candidates.length) popImg.src = candidates[i];
+    else popCap.textContent = `找不到圖片：${filename}（請檢查檔名大小寫）`;
   };
   popImg.src = candidates[i];
 }
 
 function updateImage(){
   if(!currentGroup || !currentGroup.length) return;
-  const src = currentGroup[currentIdx];
-  setImageWithFallback(src);
-  popCap.textContent = `${src}  (${currentIdx+1}/${currentGroup.length})`;
+  const name = currentGroup[currentIdx];
+  setImageWithFallback(name);
+  popCap.textContent = `${name}  (${currentIdx+1}/${currentGroup.length})`;
   const v = currentGroup.length>1 ? 'visible' : 'hidden';
   btnPrev.style.visibility = v; btnNext.style.visibility = v;
 }
