@@ -3,104 +3,170 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>回憶時間軸</title>
+<title>塑塑寶貝Yui的臉部進化史</title>
 <style>
-  :root{--bg:#0b0c10;--panel:#15171e;--ink:#e8e8ee;--muted:#9aa0a6;--accent:#7aa2ff;--ring:#304ffe55;--shadow:0 10px 30px rgba(0,0,0,.35)}
-  *{box-sizing:border-box} html,body{height:100%}
-  body{margin:0;background:linear-gradient(180deg,#0b0c10 0%, #11131a 100%);color:var(--ink);font-family:ui-sans-serif,system-ui,"Noto Sans TC","PingFang TC",Segoe UI,Roboto,Helvetica,Arial}
-  header{padding:18px 20px 6px;position:sticky;top:0;z-index:3;background:linear-gradient(180deg,rgba(11,12,16,.95) 0%,rgba(11,12,16,.7) 100%);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-bottom:1px solid #1f2230}
-  h1{margin:0;font-size:20px;letter-spacing:.5px} .sub{color:var(--muted);font-size:12px;margin-top:6px}
-  .wrap{padding:18px 20px}
-  .timeline{background:var(--panel);border:1px solid #222636;border-radius:16px;padding:18px;box-shadow:var(--shadow)}
-  .track{display:flex;gap:36px;align-items:center;overflow-x:auto;scrollbar-width:thin;padding:14px 6px}
-  .track::-webkit-scrollbar{height:8px}.track::-webkit-scrollbar-thumb{background:#2a2f42;border-radius:8px}
-  .rail{height:2px;background:#2a2f42;position:relative;flex:1;min-width:1200px}
-  .nodes{position:absolute;inset:-14px 0 -14px 0;display:flex;gap:36px;align-items:center}
-  .node{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;min-width:86px}
-  .dot{width:14px;height:14px;border-radius:999px;background:var(--accent);box-shadow:0 0 0 6px var(--ring),0 4px 16px rgba(122,162,255,.35);transition:transform .15s ease}
-  .node:hover .dot{transform:scale(1.15)}
-  .label{font-size:13px;color:var(--ink);opacity:.95;text-align:center;white-space:nowrap}
+  /* ======= T2 玫粉甜心配色（莫蘭迪粉＋柔光暈） ======= */
+  :root{
+    --bg1:#211922;            /* 深梅子 */
+    --bg2:#2a1f2b;            /* 梅紫漸層 */
+    --panel:#2f2533;          /* 卡片底 */
+    --ink:#F6F0F4;            /* 文字 */
+    --muted:#D9C9D4;          /* 次要文字 */
+    --accent:#E9A3B4;         /* 粉色重點 */
+    --accent2:#F4C2D3;        /* 柔粉光暈 */
+    --rail:#433949;           /* 軌道 */
+    --pill-bg:#3a2d3f;        /* 膠囊底 */
+    --shadow:0 14px 34px rgba(0,0,0,.35);
+    --glow:0 0 0 6px rgba(233,163,180,.18),0 10px 26px rgba(233,163,180,.25);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 100%);
+    color:var(--ink);
+    font-family:ui-sans-serif,system-ui,"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial;
+  }
 
-  /* popover */
+  /* 頁首 */
+  header{
+    padding:20px 22px 10px;
+    position:sticky; top:0; z-index:3;
+    background:linear-gradient(180deg,rgba(33,25,34,.92) 0%, rgba(33,25,34,.72) 100%);
+    backdrop-filter: blur(6px);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  h1{margin:0; font-size:22px; letter-spacing:.6px}
+  .sub{color:var(--muted); font-size:13px; margin-top:6px}
+  .wrap{padding:18px 22px}
+
+  /* 時間軸容器（提高高度、只開水平捲動） */
+  .timeline{
+    background:var(--panel); border:1px solid rgba(255,255,255,.07); border-radius:16px;
+    padding:18px; box-shadow:var(--shadow);
+    overflow:visible;
+  }
+  .track{
+    position:relative;
+    display:flex; align-items:center; gap:24px;
+    overflow-x:auto; overflow-y:hidden;           /* ← 垂直不捲動 */
+    padding:32px 8px 36px;                        /* ← 增加高度空間 */
+    scrollbar-width:thin;
+  }
+  .track::-webkit-scrollbar{height:8px}
+  .track::-webkit-scrollbar-thumb{background:#3e3343;border-radius:8px}
+
+  .rail{
+    position:absolute; left:12px; right:12px; top:64px;  /* 軌道位置更低，避免擠壓 */
+    height:2px; background:var(--rail); border-radius:1px;
+  }
+
+  /* N2：膠囊標籤節點 */
+  .nodes{display:flex; gap:18px; align-items:center; min-width:1100px}
+  .node{position:relative}
+  .pill{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:8px 16px; border-radius:999px;
+    background:linear-gradient(180deg,var(--pill-bg),#35293b);
+    color:var(--ink); font-size:13px; letter-spacing:.2px; white-space:nowrap;
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:var(--glow);
+    transition:transform .16s ease, box-shadow .2s ease, background .2s ease;
+    cursor:pointer;
+  }
+  .pill::before{ /* 小心跳愛心點 */
+    content:"";
+    width:10px;height:10px;border-radius:50%;
+    margin-right:8px;
+    background:radial-gradient(circle at 30% 30%, var(--accent2), var(--accent));
+    box-shadow:0 0 12px rgba(244,194,211,.55);
+  }
+  .node:hover .pill{ transform:scale(1.06); box-shadow:0 0 0 8px rgba(244,194,211,.16),0 16px 36px rgba(233,163,180,.28) }
+
+  /* C2：拍立得卡片（白框＋下方手寫小字） */
   .popover{
     position:fixed; z-index:5; display:none;
-    background:#0f1118; border:1px solid #2a2f42; border-radius:14px;
-    box-shadow: var(--shadow);
-    width:min(92vw,640px); min-width:320px; padding:12px;  /* 固定寬避免縮成小塊 */
+    width:min(92vw,640px); min-width:340px; padding:14px;
+    background:transparent; border:0; box-shadow:none;
     animation:fadeIn .14s ease-out;
   }
-  @keyframes fadeIn{from{opacity:0; transform:translateY(6px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
-  .pop-inner{position:relative}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+  .polaroid{
+    background:#fff; border-radius:12px; padding:12px 12px 22px;
+    box-shadow:0 18px 44px rgba(0,0,0,.45), 0 0 0 1px rgba(0,0,0,.06);
+    transform:rotate(-.4deg);    /* 微微傾斜更像實體相片 */
+  }
   .pop-img{
-    width:100%; max-height:70vh; display:block; border-radius:10px;
-    object-fit:contain; background:#0b0c10;  /* 載不到也不會亂版 */
+    width:100%; max-height:70vh; display:block; object-fit:contain;
+    border-radius:8px; background:#000;
   }
-  .pop-caption{font-size:12px;color:var(--muted); margin-top:8px}
-  .nav{position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between; pointer-events:none}
+  .pop-caption{
+    margin-top:10px; color:#373537; font-size:13px;
+    font-family:cursive, "Noto Sans TC","Microsoft JhengHei",sans-serif; /* 手寫感（使用系統字體） */
+    letter-spacing:.2px;
+  }
+  .nav{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between; pointer-events:none;
+  }
   .nav button{
-    pointer-events:auto; border:1px solid #3a3f55; background:#151826; color:var(--ink);
-    width:32px;height:32px;border-radius:999px; display:grid; place-items:center; cursor:pointer; opacity:.9;
+    pointer-events:auto; border:1px solid rgba(0,0,0,.12); background:rgba(255,255,255,.85);
+    width:34px;height:34px;border-radius:999px; display:grid; place-items:center; cursor:pointer;
   }
-  .nav button:hover{opacity:1}
+  .nav button:hover{ filter:brightness(1.05) }
   .close-btn{
-    position:absolute; top:8px; right:8px;
-    width:30px; height:30px; border-radius:999px; border:1px solid #3a3f55;
-    background:#151826; color:var(--ink); display:grid; place-items:center; cursor:pointer; opacity:.85;
+    position:absolute; top:-6px; right:-6px;
+    width:30px; height:30px; border-radius:999px; border:1px solid rgba(0,0,0,.12);
+    background:rgba(255,255,255,.9); color:#333; display:grid; place-items:center; cursor:pointer;
   }
   .scrim{position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; z-index:4; backdrop-filter: blur(2px);}
 
-  .hint{margin-top:12px; font-size:12px; color:var(--muted)}
-  .kbd{padding:.5px 6px;border:1px solid #2c3146;border-bottom-width:2px;border-radius:6px;background:#0f1220;color:#b8c1ff}
-
-  @media (max-width:640px){
-    .rail{min-width:auto;height:auto}
-    .nodes{position:static; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px}
-    .track{overflow-x:visible}
-    .node{min-width:auto; align-items:flex-start}
-    .dot{width:10px;height:10px}
-    .label{font-size:14px}
+  /* 手機：仍改為垂直列表（維持可讀性） */
+  @media (max-width: 640px){
+    .nodes{min-width:unset; flex-wrap:wrap; gap:12px}
+    .track{overflow-x:visible; padding:24px 6px 24px}
+    .rail{display:none}
   }
 </style>
 </head>
 <body>
-<header>
-  <h1>回憶時間軸</h1>
-  <div class="sub">滑鼠移到節點會顯示照片；手機請輕點節點開啟，再點空白處關閉。</div>
-</header>
+  <header>
+    <h1>塑塑寶貝Yui的臉部進化史</h1>
+    <div class="sub">電腦移動游標輕觸年份便能回望當年的模樣；手機輕點節點開啟相片，再輕點空白處即可闔上。</div>
+  </header>
 
-<div class="wrap">
-  <div class="timeline">
-    <div class="track">
-      <div class="rail"><div id="nodes" class="nodes"></div></div>
+  <div class="wrap">
+    <div class="timeline">
+      <div class="track">
+        <div class="rail"></div>
+        <div id="nodes" class="nodes"></div>
+      </div>
     </div>
-    <div class="hint">新增照片只要把檔名放進 <span class="kbd">FILES</span> 陣列；同前綴＋數字會自動成一組（如 <span class="kbd">2017以前.jpg</span>、<span class="kbd">2017以前2.jpg</span>）。</div>
   </div>
-</div>
 
-<div id="scrim" class="scrim"></div>
-<div id="popover" class="popover" role="dialog" aria-modal="true">
-  <button class="close-btn" title="關閉" aria-label="關閉" id="closeBtn">×</button>
-  <div class="pop-inner">
-    <img id="popImg" class="pop-img" src="" alt="回憶照片" />
-    <div class="nav">
-      <button id="prevBtn" title="上一張" aria-label="上一張">‹</button>
-      <button id="nextBtn" title="下一張" aria-label="下一張">›</button>
+  <div id="scrim" class="scrim"></div>
+  <div id="popover" class="popover" role="dialog" aria-modal="true">
+    <button class="close-btn" title="關閉" aria-label="關閉" id="closeBtn">×</button>
+    <div class="polaroid">
+      <img id="popImg" class="pop-img" src="" alt="回憶照片" />
+      <div class="nav">
+        <button id="prevBtn" title="上一張" aria-label="上一張">‹</button>
+        <button id="nextBtn" title="下一張" aria-label="下一張">›</button>
+      </div>
+      <div id="popCaption" class="pop-caption"></div>
     </div>
-    <div id="popCaption" class="pop-caption"></div>
   </div>
-</div>
 
 <script defer>
-/* ===== 這裡列你的檔名（跟 repo 裡完全一樣） ===== */
+/* ===== 你的實際檔名（與 repo 完全一致） ===== */
 const FILES = [
-  "2017以前.jpg",   // 你說這張要顯示——已加入
+  "2017以前.jpg",
   "2017以前2.jpg",
   "2017以前3.jpg",
-  "2017以前.PNG",   // 要的話保留；不想重複可刪
+  "2017以前.PNG",
   "2020.jpg","2021.jpg","2022.jpg","2023.jpg","2024.jpg","2025.jpg"
 ];
 
-/* ===== 規則：依檔名自動分組與排序 ===== */
+/* —— 核心：依檔名分組排序（保留原來邏輯） —— */
 const stripExt = f => f.replace(/\.[^/.]+$/,'');
 const isYear   = s => /^\d{4}$/.test(s);
 const groupKey = base => isYear(base) ? base : base.replace(/[-_]?(\d+)$/,'');
@@ -121,17 +187,17 @@ function buildGroups(files){
   return {map, keys};
 }
 
-/* ===== 繪節點 ===== */
+/* —— 繪製 N2 膠囊節點 —— */
 const nodesEl = document.getElementById('nodes');
 const {map: groups, keys} = buildGroups(FILES);
 for (const key of keys){
   const node = document.createElement('div');
-  node.className = 'node'; node.tabIndex = 0; node.dataset.label = key;
-  node.innerHTML = `<div class="dot" aria-hidden="true"></div><div class="label">${key}</div>`;
+  node.className = 'node'; node.dataset.label = key; node.tabIndex = 0;
+  node.innerHTML = `<div class="pill">${key}</div>`;
   nodesEl.appendChild(node);
 }
 
-/* ===== 浮層行為 ===== */
+/* —— C2 拍立得浮層：保留副檔名自動補救（大小寫/副檔名通吃） —— */
 const pop = document.getElementById('popover');
 const scrim = document.getElementById('scrim');
 const popImg = document.getElementById('popImg');
@@ -146,29 +212,26 @@ function openPopover(label, anchorEl){
   currentGroup = groups.get(label) || [];
   currentIdx = 0; updateImage();
 
-  const r = anchorEl.getBoundingClientRect(), gap = 12;
-  const preferredTop = Math.max(12, r.top - (pop.offsetHeight || 380) - gap);
-  const w = pop.offsetWidth || 480;
+  // 智慧定位：在節點上方置中顯示
+  const r = anchorEl.getBoundingClientRect(), gap = 14;
+  const w = pop.offsetWidth || 520, h = pop.offsetHeight || 420;
+  const top = Math.max(12, r.top - h - gap);
   const left = Math.min(innerWidth - 12 - w, Math.max(12, r.left + r.width/2 - w/2));
-  pop.style.left = left + "px"; pop.style.top = preferredTop + "px";
+  pop.style.top = top + "px"; pop.style.left = left + "px";
 
   pop.style.display = 'block'; scrim.style.display = 'block';
 }
 function closePopover(){ pop.style.display='none'; scrim.style.display='none'; currentGroup=null; }
 
-/* ===== 重要：載入失敗時自動嘗試各種副檔名與大小寫，並用 encodeURI 處理中文檔名 ===== */
 function makeCandidates(filename){
   const base = stripExt(filename);
   const orig = filename.slice(filename.lastIndexOf('.')) || '';
-  const cand = [];
-  const push = u => { if(!cand.includes(u)) cand.push(u); };
-
+  const cand = []; const push = u => { if(!cand.includes(u)) cand.push(u); };
   if (orig) { push(base+orig); push(base+orig.toLowerCase()); push(base+orig.toUpperCase()); }
   push(filename);
   ['.jpg','.jpeg','.png','.webp','.JPG','.JPEG','.PNG','.WEBP'].forEach(e => push(base+e));
-  return cand.map(u => encodeURI(u));  // 關鍵：中文與空白編碼
+  return cand.map(u => encodeURI(u));  // 處理中文/空白
 }
-
 function setImageWithFallback(filename){
   const candidates = makeCandidates(filename);
   let i = 0;
@@ -179,7 +242,6 @@ function setImageWithFallback(filename){
   };
   popImg.src = candidates[i];
 }
-
 function updateImage(){
   if(!currentGroup || !currentGroup.length) return;
   const name = currentGroup[currentIdx];
@@ -192,11 +254,10 @@ function updateImage(){
 /* 事件 */
 nodesEl.addEventListener('mouseenter', e=>{
   const el = e.target.closest('.node'); if(!el) return;
-  if (matchMedia('(hover:hover)').matches) openPopover(el.dataset.label, el);
+  if (matchMedia('(hover:hover)').matches) openPopover(el, el);
 }, true);
 nodesEl.addEventListener('click', e=>{
-  const el = e.target.closest('.node'); if(!el) return;
-  openPopover(el.dataset.label, el);
+  const el = e.target.closest('.node'); if(!el) return; openPopover(el, el);
 });
 scrim.addEventListener('click', closePopover);
 btnClose.addEventListener('click', closePopover);
